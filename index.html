@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Suivi des notes – 3ème · Lycée Privé CANA</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#14213d;--mut:#5b6884;--line:#dbe1ee;--ok:#15803d;--okb:#dcf3e4;--ko:#b42318;--kob:#fde4e1;--acc:#1d3a8a;--accb:#e6ecfb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1525;--card:#172036;--ink:#e8edf8;--mut:#9aa7c4;--line:#2a3654;--ok:#4ade80;--okb:#14351f;--ko:#ff8a7d;--kob:#3b1915;--acc:#8fb0ff;--accb:#1e2c55}}
+:root[data-theme="dark"]{--bg:#0e1525;--card:#172036;--ink:#e8edf8;--mut:#9aa7c4;--line:#2a3654;--ok:#4ade80;--okb:#14351f;--ko:#ff8a7d;--kob:#3b1915;--acc:#8fb0ff;--accb:#1e2c55}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Figtree,system-ui,sans-serif}
+h1,h2,h3{font-family:'Bricolage Grotesque',Figtree,sans-serif;margin:0;line-height:1.15}
+header{padding:18px 16px 0;max-width:980px;margin:auto}
+h1{font-size:26px;font-weight:800}header p{margin:4px 0 0;color:var(--mut)}
+nav{display:flex;gap:4px;margin:14px 0 0;border-bottom:2px solid var(--line);overflow-x:auto}
+nav button{border:0;background:none;color:var(--mut);font:600 15px Figtree,sans-serif;padding:10px 14px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+nav button.on{color:var(--acc);border-color:var(--acc)}
+main{max-width:980px;margin:auto;padding:16px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.kpi b{display:block;font:800 28px 'Bricolage Grotesque',sans-serif}.kpi span{color:var(--mut);font-size:13px}
+h2{font-size:19px;margin:22px 0 10px}
+.subj{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer;color:inherit;font:inherit}
+.subj.on{border-color:var(--acc);box-shadow:0 0 0 2px var(--accb)}
+.subj .t{display:flex;justify-content:space-between;gap:8px;font-weight:600;flex-wrap:wrap}.subj .t small{color:var(--mut);font-weight:400}
+.bar{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:8px 0 4px;background:var(--line)}
+.bar i{display:block}.bar .a{background:var(--ok)}.bar .b{background:var(--ko)}
+.sub{font-size:13px;color:var(--mut);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.flag{background:var(--kob);color:var(--ko);padding:1px 8px;border-radius:9px;font-size:12px;font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.two{grid-template-columns:1fr}.kpi b{font-size:22px}}
+.col{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.col h3{font-size:16px;margin-bottom:8px}.col.g h3{color:var(--ok)}.col.r h3{color:var(--ko)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.sc{font-weight:600;font-variant-numeric:tabular-nums}
+.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;text-align:center;border-top:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;color:var(--mut);background:var(--bg);border-top:0}
+td:nth-child(2),th:nth-child(2){text-align:left}
+.ok{background:var(--okb);color:var(--ok);font-weight:600}.ko{background:var(--kob);color:var(--ko);font-weight:600}
+button.btn,a.btn,select,input,textarea{font:inherit;color:inherit}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 12px;cursor:pointer;text-decoration:none;display:inline-block;font-weight:600}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff}:root[data-theme="dark"] .btn.p{color:#0e1525}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.p{color:#0e1525}}
+.btn.s{padding:3px 9px;font-size:13px}
+input,select,textarea{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 9px;max-width:100%}
+td input.n{width:58px;text-align:center;padding:5px}
+.bar2{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.note{background:var(--accb);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:14px}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);width:min(520px,94vw);padding:16px}
+dialog::backdrop{background:rgba(10,15,30,.55)}
+dialog textarea{width:100%;height:170px;margin:8px 0}dialog label{display:block;margin-top:8px;font-weight:600;font-size:14px}dialog input,dialog select{width:100%}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.empty{color:var(--mut);padding:8px 0}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+</style></head><body>
+<header>
+<h1>Suivi des notes · 3ème</h1>
+<p>Lycée Privé CANA — moyenne = (moyenne des devoirs + composition) ÷ 2</p>
+<nav id="nav"></nav>
+</header>
+<main id="app"><p id="boot" class="empty">Chargement…</p></main>
+<script>addEventListener("error",function(e){var a=document.getElementById("boot");if(a)a.innerHTML="Erreur : "+(e.message||"chargement impossible")});setTimeout(function(){var b=document.getElementById("boot");if(b)b.innerHTML="Le chargement est bloqué. Ouvrez ce fichier depuis une adresse https hébergée (pas depuis Téléchargements) et vérifiez la connexion internet."},7000)</script>
+
+<dialog id="dm">
+<h3>Message au parent</h3>
+<label>Élève <span id="dmn"></span></label>
+<label for="dmp">Téléphone du parent</label><input id="dmp" inputmode="tel" placeholder="Ex. 70 00 00 00">
+<label for="dms">Contenu</label><select id="dms"></select>
+<textarea id="dmt" aria-label="Message"></textarea>
+<div class="acts"><a class="btn p" id="dmw" target="_blank" rel="noopener">Envoyer par WhatsApp</a><a class="btn" id="dmsms">Envoyer par SMS</a><button class="btn" id="dmc">Copier</button><button class="btn" id="dmx">Fermer</button></div>
+</dialog>
+
+<dialog id="di">
+<h3>Importer des notes</h3>
+<p style="margin:6px 0;color:var(--mut);font-size:14px">Collez depuis Excel ou chargez un fichier .csv. Une ligne par élève, séparée par tabulation ou « ; » :<br><b>Nom ; Devoir 1 ; Devoir 2 ; Devoir 3 ; Composition</b><br>Les cases vides sont permises. Les élèves inconnus sont ajoutés.</p>
+<input type="file" id="dif" accept=".csv,.txt,text/csv,text/plain">
+<textarea id="dit" placeholder="Kaboré Fatoumata;12;14;11,5;13"></textarea>
+<div class="acts"><button class="btn p" id="dio">Importer</button><button class="btn" id="dix">Annuler</button></div>
+</dialog>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import{initializeFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,collection}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+const app=initializeApp({apiKey:"AIzaSyDxVcn5qpc6LIOEXkb2rEaO21foxTuCdPE",authDomain:"cana-note-en-temps-reel.firebaseapp.com",projectId:"cana-note-en-temps-reel",storageBucket:"cana-note-en-temps-reel.firebasestorage.app",messagingSenderId:"866979178551",appId:"1:866979178551:web:dba822caaa420dec8237b2"});
+const auth=getAuth(app),db=initializeFirestore(app,{ignoreUndefinedProperties:true});
+const K='cana3e-notes-v1',$=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=v=>{if(v==null||v==='')return null;const n=parseFloat(String(v).replace(',','.'));return isNaN(n)?null:Math.min(20,Math.max(0,n))};
+const f=n=>n==null?'–':(Math.round(n*100)/100).toString().replace('.',',');
+function demo(){let seed=7;const r=()=>(seed=(seed*9301+49297)%233280)/233280;
+const D={teacher:'',demo:true,students:['Ouédraogo Aïcha','Sawadogo Ibrahim','Kaboré Fatoumata','Zongo Patrice','Traoré Mariam','Compaoré Serge','Sankara Estelle','Ilboudo Hamidou'].map(n=>({id:uid(),name:n,phone:''})),
+subjects:[['Mathématiques',4,'M. Ouattara'],['Physique-Chimie',2,'M. Toni'],['SVT',2,'Mme Zida'],['Français',4,'M. Nikièma'],['Anglais',2,'Mme Bambara'],['Histoire-Géo',2,'M. Sow']].map(([name,coef,teacher])=>({id:uid(),name,coef,teacher})),grades:{}};
+D.subjects.forEach((s,i)=>{D.grades[s.id]={};D.students.forEach(x=>{const b=6+r()*9-i*.3,q=()=>Math.round(Math.min(20,Math.max(2,b+r()*6-3))*2)/2;D.grades[s.id][x.id]={d:[q(),q(),q()],c:q()}})});return D}
+let S={teacher:'',students:[],subjects:[],grades:{},sent:{}},user,role=null,profile=null,USERS=[],unsubs=[],uunsub=null,ready=false,svTxt='',pendingName='',tm;
+const last={c:'',s:'',g:{}};
+const canEdit=sid=>role=='director'||(profile&&profile.subjects||[]).includes(sid);
+const mySubs=()=>role=='director'?S.subjects:S.subjects.filter(x=>canEdit(x.id));
+const typing=()=>{const a=document.activeElement;return a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&a.closest('main')};
+const setStat=t=>{svTxt=t;const e=$('#sv');if(e)e.textContent=t};
+const save=()=>{clearTimeout(tm);setStat('Enregistrement…');tm=setTimeout(flush,600)};
+async function flush(){if(!user||!ready)return;try{
+ if(role=='director'){const cj=JSON.stringify({students:S.students,subjects:S.subjects});if(cj!==last.c){last.c=cj;await setDoc(doc(db,'class','main'),{students:S.students,subjects:S.subjects})}
+  const sj=JSON.stringify(S.sent||{});if(sj!==last.s){last.s=sj;await setDoc(doc(db,'meta','sent'),{keys:S.sent||{}})}}
+ for(const sb of S.subjects){const gj=JSON.stringify(S.grades[sb.id]||{});if(gj!==last.g[sb.id]&&canEdit(sb.id)){last.g[sb.id]=gj;await setDoc(doc(db,'grades',sb.id),{data:S.grades[sb.id]||{}})}}
+ setStat('Enregistré ✓')}catch(e){setStat('Erreur d’enregistrement')}}
+function listen(){unsubs.forEach(f=>f());unsubs=[];if(role!='director'&&role!='teacher')return;
+ unsubs.push(onSnapshot(doc(db,'class','main'),sn=>{ready=true;if(sn.metadata.hasPendingWrites)return;const d=sn.data()||{};S.students=d.students||[];S.subjects=d.subjects||[];last.c=JSON.stringify({students:S.students,subjects:S.subjects});if(!typing())render()}));
+ unsubs.push(onSnapshot(collection(db,'grades'),sn=>{sn.docChanges().forEach(c=>{if(c.type=='removed')delete S.grades[c.doc.id];else if(!c.doc.metadata.hasPendingWrites){S.grades[c.doc.id]=c.doc.data().data||{};last.g[c.doc.id]=JSON.stringify(S.grades[c.doc.id])}});if(!typing())render()}));
+ if(role=='director'){
+  unsubs.push(onSnapshot(doc(db,'meta','sent'),sn=>{if(sn.metadata.hasPendingWrites)return;S.sent=(sn.data()||{}).keys||{};last.s=JSON.stringify(S.sent)}));
+  unsubs.push(onSnapshot(collection(db,'users'),sn=>{USERS=sn.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.role=='pending'?0:1)-(b.role=='pending'?0:1));if(!(tab=='comptes'&&typing()))render()}))}}
+const authErr=e=>({'auth/invalid-credential':'E-mail ou mot de passe incorrect.','auth/email-already-in-use':'Cet e-mail a déjà un compte : utilisez « Se connecter ».','auth/weak-password':'Mot de passe trop court (6 caractères minimum).','auth/invalid-email':'Adresse e-mail invalide.','auth/missing-password':'Saisissez le mot de passe.'}[e.code]||'Erreur : '+(e.code||e.message));
+const login=()=>`<div class="col" style="max-width:380px;margin:20px auto"><h2 style="margin-top:0">Connexion</h2>
+<label style="display:block;margin-top:8px">Nom complet (pour créer un compte)<input id="lnm" style="width:100%" autocomplete="name"></label>
+<label style="display:block;margin-top:8px">E-mail<input id="lem" type="email" style="width:100%" autocomplete="username"></label>
+<label style="display:block;margin-top:8px">Mot de passe<input id="lpw" type="password" style="width:100%" autocomplete="current-password"></label>
+<div class="acts"><button class="btn p" data-a="login">Se connecter</button><button class="btn" data-a="signup">Créer un compte</button></div><p id="lerr" class="empty" role="alert"></p></div>`;
+const pendingV=()=>`<div class="col" style="max-width:420px;margin:20px auto"><h2 style="margin-top:0">Compte en attente</h2><p>Votre compte est créé. La direction doit maintenant vous attribuer vos matières. Revenez ensuite sur cette page : elle se met à jour toute seule.</p></div>`;
+function comptes(){const R=[['pending','En attente'],['teacher','Professeur'],['director','Directeur']];
+ return`<h2>Comptes</h2><p class="empty">Chaque utilisateur crée son compte, puis apparaît ici en attente. Choisissez « Professeur » et cochez ses matières.</p>`+(USERS.length?`<div class="wrap"><table><tr><th>#</th><th>Utilisateur</th><th>Rôle</th><th>Matières</th><th></th></tr>`+USERS.map((u,i)=>`<tr><td>${i+1}</td><td>${esc(u.name||'')}<br><small>${esc(u.email||'')}</small></td><td><select data-ur="${u.id}">${R.map(([k,l])=>`<option value="${k}" ${u.role==k?'selected':''}>${l}</option>`).join('')}</select></td><td style="text-align:left">${S.subjects.map(x=>`<label style="display:block"><input type="checkbox" data-us="${u.id}" data-sid="${x.id}" ${(u.subjects||[]).includes(x.id)?'checked':''}> ${esc(x.name)}</label>`).join('')||'<span class="empty">Créez d’abord les matières</span>'}</td><td><button class="btn s p" data-a="saveu" data-id="${u.id}">Enregistrer</button></td></tr>`).join('')+'</table></div>':'<p class="empty">Aucun compte pour l’instant.</p>')}
+const G=(sid,id)=>((S.grades[sid]||{})[id])||{d:[null,null,null],c:null};
+const moy=(sid,id)=>{const g=G(sid,id),ds=g.d.filter(x=>x!=null);if(!ds.length||g.c==null)return null;return(ds.reduce((a,b)=>a+b,0)/ds.length+g.c)/2};
+const gen=(id,k='m')=>{let t=0,w=0;S.subjects.forEach(s=>{const m=val(s.id,id,k);if(m!=null){t+=m*s.coef;w+=s.coef}});return w?t/w:null};
+const st=sid=>{const r=S.students.map(x=>({x,m:val(sid,x.id,dEv)})).filter(r=>r.m!=null).sort((a,b)=>b.m-a.m);const ok=r.filter(r=>r.m>=10);return{ok,ko:r.filter(r=>r.m<10),n:r.length,p:r.length?Math.round(ok.length/r.length*100):null,avg:r.length?r.reduce((a,b)=>a+b.m,0)/r.length:null}};
+const cl=m=>m==null?'':m>=10?'ok':'ko';
+let tab='dash',sel=null,esel=null,dEv=null;user=undefined;
+const bestEv=()=>{if(S.subjects.some(s=>S.students.some(x=>moy(s.id,x.id)!=null)))return'm';for(const k of['c','d2','d1','d0'])if(S.subjects.some(s=>S.students.some(x=>val(s.id,x.id,k)!=null)))return k;return'd0'};
+const evL=()=>dEv=='m'?'Moyenne du trimestre':EV.find(e=>e[0]==dEv)[1];
+const tabs=[['dash','Tableau de bord'],['saisie','Saisie des notes'],['envoi','Envoi aux parents'],['classe','Classe et matières'],['comptes','Comptes']];
+function nav(){const ok=user&&(role=='director'||role=='teacher');$('#nav').innerHTML=(ok?tabs.filter(([k])=>role=='director'||k=='dash'||k=='saisie').map(([k,l])=>`<button class="${k==tab?'on':''}" data-a="tab" data-v="${k}">${l}${k=='comptes'&&USERS.some(u=>u.role=='pending')?' •':''}</button>`).join(''):'')+(user?`<span id="sv" class="empty" style="margin-left:auto;align-self:center;white-space:nowrap">${svTxt}</span><button data-a="logout" style="border:0;background:none;color:var(--mut);font:600 14px Figtree,sans-serif;cursor:pointer;padding:10px">Déconnexion</button>`:'')}
+function msgBtn(id,sid){if(role!='director')return'';return`<button class="btn s" data-a="msg" data-id="${id}" data-s="${sid||'all'}">Message parent</button>`}
+function dash(){
+ if(!S.subjects.length)return'<p class="empty">Ajoutez des matières dans « Classe et matières ».</p>';
+ if(dEv==null)dEv=bestEv();
+ if(!S.subjects.find(s=>s.id==sel))sel=S.subjects[0].id;
+ const gs=S.students.map(x=>gen(x.id,dEv)).filter(v=>v!=null),gok=gs.filter(v=>v>=10).length;
+ const all=S.subjects.map(s=>({s,t:st(s.id)})),ps=all.filter(o=>o.t.p!=null).map(o=>o.t.p),low=ps.length>1?Math.min(...ps):null;
+ let h=(S.demo?'<div class="note">Données d’exemple affichées. Allez dans « Classe et matières » pour les effacer et saisir votre classe.</div>':'')+
+ `<div class="bar2"><label>Évaluation <select id="dev">${EV.map(([k,l])=>`<option value="${k}" ${k==dEv?'selected':''}>${k=='m'?'Moyenne du trimestre':l}</option>`).join('')}</select></label><span class="empty">Les statistiques se calculent dès qu’une évaluation est saisie, sans attendre la fin du trimestre.</span></div>
+ <div class="kpis"><div class="kpi"><b>${S.students.length}</b><span>élèves</span></div><div class="kpi"><b>${f(gs.length?gs.reduce((a,b)=>a+b,0)/gs.length:null)}</b><span>moyenne de la classe /20</span></div><div class="kpi"><b>${gs.length?Math.round(gok/gs.length*100)+' %':'–'}</b><span>moyenne ≥ 10 (ensemble des matières)</span></div></div>
+ <h2>Réussite par matière · ${evL()}</h2>`;
+ all.forEach(({s,t})=>{h+=`<button class="subj ${s.id==sel?'on':''}" data-a="sel" data-v="${s.id}"><div class="t"><span>${esc(s.name)} <small>coef. ${s.coef}</small></span><span>${t.p==null?'Pas de notes':t.p+' % ≥ 10'} ${t.p!=null&&t.p===low?'<span class="flag">Taux le plus bas</span>':''}</span></div>
+ <div class="bar" role="img" aria-label="${t.ok.length} élèves à 10 ou plus, ${t.ko.length} sous 10">${t.n?`<i class="a" style="width:${t.ok.length/t.n*100}%"></i><i class="b" style="width:${t.ko.length/t.n*100}%"></i>`:''}</div>
+ <div class="sub"><span>${t.ok.length} ≥ 10 · ${t.ko.length} &lt; 10</span><span>moyenne de classe : ${f(t.avg)}</span></div></button>`});
+ const rkp=all.filter(o=>o.t.p!=null).sort((a,b)=>b.t.p-a.t.p||b.t.avg-a.t.avg);
+ h+=`<h2>Classement des professeurs · ${evL()}</h2><div class="wrap"><table><tr><th>Rang</th><th>Professeur</th><th>Matière</th><th>% ≥ 10</th><th>Moy. classe</th></tr>`+(rkp.length?rkp.map((o,i)=>`<tr><td>${i+1}</td><td>${esc(o.s.teacher||'Non renseigné')}</td><td>${esc(o.s.name)}</td><td class="${o.t.p>=50?'ok':'ko'}">${o.t.p} %</td><td>${f(o.t.avg)}</td></tr>`).join(''):'<tr><td colspan="5">Pas encore de notes</td></tr>')+'</table></div><p class="empty">Classé par pourcentage d’élèves ≥ 10, puis par moyenne de classe.</p>';
+ const s=S.subjects.find(a=>a.id==sel),t=st(sel);
+ const list=a=>a.length?a.map(r=>`<div class="row"><span>${esc(r.x.name)}</span><span><span class="sc">${f(r.m)}</span> ${msgBtn(r.x.id,sel)}</span></div>`).join(''):'<div class="empty">Personne</div>';
+ h+=`<h2>${esc(s.name)} : qui est à l’aise, qui a besoin d’aide</h2><div class="two"><div class="col g"><h3>Note ≥ 10 (${t.ok.length})</h3>${list(t.ok)}</div><div class="col r"><h3>Note &lt; 10 (${t.ko.length})</h3>${list(t.ko)}</div></div>`;
+ const rk=S.students.map(x=>({x,g:gen(x.id,dEv)})).sort((a,b)=>(b.g??-1)-(a.g??-1));
+ h+=`<h2>Classement général · ${evL()}</h2><div class="wrap"><table><tr><th>Rang</th><th>Élève</th>${S.subjects.map(s=>`<th title="${esc(s.name)}">${esc(s.name.slice(0,5))}.</th>`).join('')}<th>Moy. gén.</th><th></th></tr>`+
+ rk.map((r,i)=>`<tr><td>${r.g==null?'–':i+1}</td><td>${esc(r.x.name)}</td>${S.subjects.map(s=>{const m=val(s.id,r.x.id,dEv);return`<td class="${cl(m)}">${f(m)}</td>`}).join('')}<td class="${cl(r.g)}">${f(r.g)}</td><td>${msgBtn(r.x.id,'all')}</td></tr>`).join('')+'</table></div>';
+ return h}
+function saisie(){
+ const MS=mySubs();if(!MS.length)return'<p class="empty">Aucune matière ne vous est attribuée. Demandez à la direction.</p>';
+ if(!MS.find(s=>s.id==esel))esel=MS[0].id;
+ let h=`<div class="bar2"><label>Matière <select id="es">${MS.map(s=>`<option value="${s.id}" ${s.id==esel?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label>
+ <button class="btn p" data-a="imp">Importer des notes</button></div>
+ <p class="empty" style="margin-top:0">La moyenne s’affiche quand au moins un devoir et la composition sont saisis. Notes sur 20.</p>
+ <div class="wrap"><table><tr><th>#</th><th>Élève</th><th>Devoir 1</th><th>Devoir 2</th><th>Devoir 3</th><th>Compo.</th><th>Moyenne</th><th></th></tr>`;
+ S.students.forEach((x,i)=>{const g=G(esel,x.id),m=moy(esel,x.id);
+ h+=`<tr><td>${i+1}</td><td>${esc(x.name)}</td>`+[0,1,2].map(k=>`<td><input class="n" inputmode="decimal" data-i="d${k}" data-st="${x.id}" value="${g.d[k]==null?'':f(g.d[k])}" aria-label="Devoir ${k+1} ${esc(x.name)}"></td>`).join('')+
+ `<td><input class="n" inputmode="decimal" data-i="c" data-st="${x.id}" value="${g.c==null?'':f(g.c)}" aria-label="Composition ${esc(x.name)}"></td><td id="m-${x.id}" class="${cl(m)}">${f(m)}</td><td>${msgBtn(x.id,esel)}</td></tr>`});
+ return h+'</table></div>'}
+function classe(){
+ return`<h2>Élèves</h2><div class="bar2"><button class="btn" data-a="wipe">Effacer et repartir à zéro</button></div>
+ <textarea id="ns" rows="4" style="width:100%" placeholder="Un élève par ligne : Nom Prénom ; téléphone du parent&#10;Kaboré Fatoumata ; 70123456"></textarea>
+ <div class="acts" style="margin:8px 0 14px"><button class="btn p" data-a="addst">Ajouter ces élèves</button></div>
+ <div class="wrap"><table><tr><th>#</th><th>Élève</th><th>Téléphone du parent</th><th></th></tr>${S.students.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.name)}</td><td><input data-ph="${x.id}" inputmode="tel" value="${esc(x.phone||'')}" aria-label="Téléphone ${esc(x.name)}"></td><td><button class="btn s" data-a="delst" data-id="${x.id}">Retirer</button></td></tr>`).join('')}</table></div>
+ <h2>Matières</h2><div class="bar2"><input id="sn" placeholder="Nom de la matière"><input id="stn" placeholder="Professeur"><input id="sc" type="number" min="1" value="2" style="width:70px" aria-label="Coefficient"><button class="btn p" data-a="addsj">Ajouter la matière</button></div>
+ <div class="wrap"><table><tr><th>#</th><th>Matière</th><th>Professeur</th><th>Coef.</th><th></th></tr>${S.subjects.map((s,i)=>`<tr><td>${i+1}</td><td>${esc(s.name)}</td><td><input data-tp="${s.id}" value="${esc(s.teacher||'')}" placeholder="Nom du professeur" aria-label="Professeur ${esc(s.name)}"></td><td>${s.coef}</td><td><button class="btn s" data-a="delsj" data-id="${s.id}">Retirer</button></td></tr>`).join('')}</table></div>`}
+const FILEMSG='<div class="note"><b>Ce fichier est ouvert depuis le téléphone (Téléchargements).</b><br>La connexion ne fonctionne qu’à partir d’une adresse https : hébergez le fichier (Netlify, Vercel…) sous le nom <b>index.html</b>, puis ouvrez le lien.</div>';
+function render(){if(role!='director'&&!['dash','saisie'].includes(tab))tab='dash';nav();$('#app').innerHTML=user===undefined?(/^https?:$/.test(location.protocol)?'<p id="boot" class="empty">Chargement…</p>':FILEMSG):!user?login():role=='pending'||!role?pendingV():tab=='dash'?dash():tab=='saisie'?saisie():tab=='envoi'?envoi():tab=='comptes'?comptes():classe()}
+function setG(sid,id,k,v){const g=S.grades[sid]=S.grades[sid]||{};const e=g[id]=g[id]||{d:[null,null,null],c:null};if(k=='c')e.c=num(v);else e.d[+k[1]]=num(v)}
+const norm=s=>s.trim().toLowerCase().replace(/\s+/g,' ');
+function phone(p){let d=(p||'').replace(/\D/g,'');if(d.length==8)d='226'+d;return d}
+function msgText(id,sid){const x=S.students.find(a=>a.id==id),tn=(sid!='all'&&(S.subjects.find(a=>a.id==sid)||{}).teacher)||S.teacher,sig=tn?'\n'+tn:'';let b;
+ if(sid=='all')b=S.subjects.map(s=>{const m=moy(s.id,id);return m==null?null:`• ${s.name} : ${f(m)}/20`}).filter(Boolean).join('\n')+`\nMoyenne générale : ${f(gen(id))}/20`;
+ else{const s=S.subjects.find(a=>a.id==sid),g=G(sid,id),m=moy(sid,id);b=`${s.name} : devoirs ${g.d.filter(v=>v!=null).map(f).join(' ; ')||'–'}, composition ${f(g.c)}, moyenne ${f(m)}/20`+(m==null?'.':m>=10?' (résultat satisfaisant).':' (insuffisant : un suivi à la maison est souhaité).')}
+ return`Bonjour, ici le Lycée Privé CANA (3ème). Résultats de ${x.name} :\n${b}\nCordialement.${sig}`}
+const EV=[['d0','Devoir 1'],['d1','Devoir 2'],['d2','Devoir 3'],['c','Composition'],['m','Moyenne']];
+let ev='d0',esub='all';
+const val=(sid,id,k)=>{const g=G(sid,id);return k=='c'?g.c:k=='m'?moy(sid,id):g.d[+k[1]]};
+const hasV=(id,k,sid)=>sid=='all'?S.subjects.some(s=>val(s.id,id,k)!=null):val(sid,id,k)!=null;
+function evMsg(id,k,sid){const x=S.students.find(a=>a.id==id),L=EV.find(e=>e[0]==k)[1];let b;
+ if(sid=='all')b=S.subjects.map(s=>{const v=val(s.id,id,k);return v==null?null:`• ${s.name} : ${f(v)}/20`}).filter(Boolean).join('\n');
+ else{const s=S.subjects.find(a=>a.id==sid);b=`${s.name} : ${f(val(sid,id,k))}/20`}
+ return`Bonjour, ici le Lycée Privé CANA (3ème). Résultats de ${x.name} – ${L} :\n${b}\nCordialement, la Direction.`}
+function envoi(){
+ const key=x=>`${ev}|${esub}|${x.id}`,rows=S.students.filter(x=>hasV(x.id,ev,esub)),sent=x=>S.sent&&S.sent[key(x)],done=rows.filter(sent).length;
+ let h=`<div class="note">Choisissez l’évaluation, puis envoyez à chaque parent : le bouton ouvre WhatsApp ou SMS avec le message déjà rédigé, il reste à appuyer sur « Envoyer ». Les envois effectués sont mémorisés.</div>
+ <div class="bar2"><label>Évaluation <select id="evs">${EV.map(([k,l])=>`<option value="${k}" ${k==ev?'selected':''}>${l}</option>`).join('')}</select></label>
+ <label>Matière <select id="ess"><option value="all">Toutes les matières</option>${S.subjects.map(s=>`<option value="${s.id}" ${s.id==esub?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label>
+ <button class="btn" data-a="rstsent">Remettre à « à envoyer »</button></div>
+ <p><b id="cnt">${done} / ${rows.length}</b> parents déjà contactés pour cette sélection</p>
+ <div class="wrap"><table><tr><th>#</th><th>Élève</th><th>Note</th><th>Téléphone du parent</th><th>Statut</th><th>Envoyer</th></tr>`;
+ if(!rows.length)return h+'<tr><td colspan="6">Aucune note saisie pour cette sélection</td></tr></table></div>';
+ rows.forEach((x,i)=>{const d=phone(x.phone),t=encodeURIComponent(evMsg(x.id,ev,esub)),k=key(x),
+ n=esub=='all'?S.subjects.filter(s=>val(s.id,x.id,ev)!=null).length+' matière(s)':f(val(esub,x.id,ev));
+ h+=`<tr><td>${i+1}</td><td>${esc(x.name)}</td><td>${n}</td><td><input data-ph="${x.id}" inputmode="tel" value="${esc(x.phone||'')}" placeholder="Numéro" aria-label="Téléphone ${esc(x.name)}"></td><td id="sn-${x.id}">${sent(x)?'✓ Envoyé':'À envoyer'}</td><td>${d?`<a class="btn s p" target="_blank" rel="noopener" data-a="sent" data-k="${k}" data-id="${x.id}" href="https://wa.me/${d}?text=${t}">WhatsApp</a> <a class="btn s" data-a="sent" data-k="${k}" data-id="${x.id}" href="sms:+${d}?body=${t}">SMS</a>`:'<span class="empty">Numéro manquant</span>'}</td></tr>`});
+ return h+'</table></div>'}
+let cur=null;
+function links(){const d=phone($('#dmp').value),t=encodeURIComponent($('#dmt').value);$('#dmw').href=d?`https://wa.me/${d}?text=${t}`:'#';$('#dmsms').href=d?`sms:+${d}?body=${t}`:'#'}
+function openMsg(id,sid){cur=id;const x=S.students.find(a=>a.id==id);$('#dmn').textContent=x.name;$('#dmp').value=x.phone||'';
+ $('#dms').innerHTML='<option value="all">Toutes les matières</option>'+S.subjects.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');$('#dms').value=sid;
+ $('#dmt').value=msgText(id,sid);links();$('#dm').showModal()}
+$('#dms').onchange=()=>{$('#dmt').value=msgText(cur,$('#dms').value);links()};
+$('#dmt').oninput=links;
+$('#dmp').oninput=()=>{const x=S.students.find(a=>a.id==cur);x.phone=$('#dmp').value;save();links()};
+$('#dmc').onclick=async()=>{try{await navigator.clipboard.writeText($('#dmt').value);$('#dmc').textContent='Copié'}catch(e){$('#dmt').select()}setTimeout(()=>$('#dmc').textContent='Copier',1500)};
+$('#dmx').onclick=()=>$('#dm').close();
+$('#dif').onchange=e=>{const r=new FileReader();r.onload=()=>$('#dit').value=r.result;if(e.target.files[0])r.readAsText(e.target.files[0])};
+$('#dix').onclick=()=>$('#di').close();
+$('#dio').onclick=()=>{let c=0;$('#dit').value.split(/\r?\n/).forEach((ln,i)=>{if(!ln.trim())return;const p=ln.split(/[;\t]/);if(i==0&&/nom/i.test(p[0]))return;
+ const nm=p[0].trim();if(!nm)return;let x=S.students.find(a=>norm(a.name)==norm(nm));if(!x){if(role!='director')return;x={id:uid(),name:nm,phone:''};S.students.push(x)}
+ [1,2,3].forEach(k=>setG(esel,x.id,'d'+(k-1),p[k]));setG(esel,x.id,'c',p[4]);c++});
+ S.demo=false;save();$('#di').close();$('#dit').value='';render()};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v,id=b.dataset.id;
+ if(a=='tab'){tab=v;render()}else if(a=='sel'){sel=v;render()}else if(a=='msg')openMsg(id,b.dataset.s);else if(a=='imp')$('#di').showModal();
+ else if(a=='sent'){S.sent=S.sent||{};S.sent[b.dataset.k]=true;save();$('#sn-'+id).textContent='✓ Envoyé';const rows=S.students.filter(x=>hasV(x.id,ev,esub));$('#cnt').textContent=rows.filter(x=>S.sent[`${ev}|${esub}|${x.id}`]).length+' / '+rows.length}
+ else if(a=='rstsent'){S.students.forEach(x=>{if(S.sent)delete S.sent[`${ev}|${esub}|${x.id}`]});save();render()}
+ else if(a=='login'||a=='signup'){const em=$('#lem').value.trim(),pw=$('#lpw').value;pendingName=$('#lnm').value.trim();$('#lerr').textContent='Connexion…';(a=='login'?signInWithEmailAndPassword(auth,em,pw):createUserWithEmailAndPassword(auth,em,pw)).catch(e=>{$('#lerr').textContent=authErr(e)})}
+ else if(a=='logout')signOut(auth);
+ else if(a=='saveu'){const r=document.querySelector(`[data-ur="${id}"]`).value,sb=[...document.querySelectorAll(`[data-us="${id}"]:checked`)].map(c=>c.dataset.sid);updateDoc(doc(db,'users',id),{role:r,subjects:sb}).then(()=>b.textContent='Enregistré ✓').catch(()=>b.textContent='Erreur')}
+ else if(a=='addst'){$('#ns').value.split(/\r?\n/).forEach(l=>{const p=l.split(/[;\t]/);if(p[0].trim())S.students.push({id:uid(),name:p[0].trim(),phone:(p[1]||'').trim()})});S.demo=false;save();render()}
+ else if(a=='delst'){if(confirm('Retirer cet élève et ses notes ?')){S.students=S.students.filter(x=>x.id!=id);save();render()}}
+ else if(a=='addsj'){const n=$('#sn').value.trim();if(n){S.subjects.push({id:uid(),name:n,teacher:$('#stn').value.trim(),coef:Math.max(1,+$('#sc').value||1)});save();render()}}
+ else if(a=='delsj'){if(confirm('Retirer cette matière et ses notes ?')){S.subjects=S.subjects.filter(x=>x.id!=id);delete S.grades[id];deleteDoc(doc(db,'grades',id)).catch(()=>{});save();render()}}
+ else if(a=='wipe'){if(confirm('Effacer tous les élèves et toutes les notes ?')){S.students=[];S.grades={};S.demo=false;save();render()}}});
+document.addEventListener('input',e=>{const t=e.target;
+ if(t.dataset.i){setG(esel,t.dataset.st,t.dataset.i,t.value);S.demo=false;save();const m=moy(esel,t.dataset.st),c=$('#m-'+t.dataset.st);c.textContent=f(m);c.className=cl(m)}
+ else if(t.dataset.ph){S.students.find(x=>x.id==t.dataset.ph).phone=t.value;save()}
+ else if(t.id=='tn'){S.teacher=t.value;S.subjects.find(s=>s.id==esel).teacher=t.value;save()}
+ else if(t.dataset.tp){S.subjects.find(s=>s.id==t.dataset.tp).teacher=t.value;save()}});
+document.addEventListener('change',e=>{const t=e.target;if(t.id=='es'){esel=t.value;render()}else if(t.id=='dev'){dEv=t.value;render()}else if(t.id=='evs'){ev=t.value;render()}else if(t.id=='ess'){esub=t.value;render()}else if(t.dataset.ph&&tab=='envoi')render()});
+onAuthStateChanged(auth,async u=>{user=u;unsubs.forEach(f=>f());unsubs=[];if(uunsub){uunsub();uunsub=null}ready=false;
+ if(!u){role=null;profile=null;S={teacher:'',students:[],subjects:[],grades:{},sent:{}};last.g={};render();return}
+ const ur=doc(db,'users',u.uid);
+ try{let sn=await getDoc(ur);
+  if(!sn.exists()){const nm=pendingName||u.email.split('@')[0];
+   try{await setDoc(ur,{email:u.email,name:nm,role:'director',subjects:[]})}catch(e){await setDoc(ur,{email:u.email,name:nm,role:'pending',subjects:[]})}}
+  uunsub=onSnapshot(ur,sn=>{const d=sn.data();if(!d)return;const r=role;profile=d;role=d.role;S.teacher=d.name||'';if(r!==role)listen();render()})}
+ catch(e){$('#app').innerHTML='<p class="empty">Erreur de connexion à la base : '+esc(e.code||e.message)+'</p>'}});
+render();
+</script></body></html>
