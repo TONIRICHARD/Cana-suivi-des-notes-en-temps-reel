@@ -2,6 +2,13 @@
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Suivi des notes – 3ème · Lycée Privé CANA</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1d3a8a">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Notes CANA">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f4f6fb;--card:#fff;--ink:#14213d;--mut:#5b6884;--line:#dbe1ee;--ok:#15803d;--okb:#dcf3e4;--ko:#b42318;--kob:#fde4e1;--acc:#1d3a8a;--accb:#e6ecfb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -54,7 +61,10 @@ dialog textarea{width:100%;height:170px;margin:8px 0}dialog label{display:block;
 .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .empty{color:var(--mut);padding:8px 0}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#bul{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:16px;z-index:50}#bul[hidden]{display:none}
+@media print{body>*:not(#bul){display:none!important}#bul{position:static;padding:0}*{color:#000!important;background:#fff!important}.noprint{display:none!important}}
 </style></head><body>
+<div id="inst" hidden style="max-width:980px;margin:8px auto 0;padding:10px 16px 0"><button class="btn p" onclick="installApp()">📲 Installer l’application</button></div>
 <header>
 <h1>Suivi des notes · 3ème</h1>
 <p>Lycée Privé CANA — moyenne = (moyenne des devoirs + composition) ÷ 2</p>
@@ -63,6 +73,7 @@ dialog textarea{width:100%;height:170px;margin:8px 0}dialog label{display:block;
 <main id="app"><p id="boot" class="empty">Chargement…</p></main>
 <script>addEventListener("error",function(e){var a=document.getElementById("boot");if(a)a.innerHTML="Erreur : "+(e.message||"chargement impossible")});setTimeout(function(){var b=document.getElementById("boot");if(b)b.innerHTML="Le chargement est bloqué. Ouvrez ce fichier depuis une adresse https hébergée (pas depuis Téléchargements) et vérifiez la connexion internet."},7000)</script>
 
+<div id="bul" hidden></div>
 <dialog id="dm">
 <h3>Message au parent</h3>
 <label>Élève <span id="dmn"></span></label>
@@ -80,10 +91,18 @@ dialog textarea{width:100%;height:170px;margin:8px 0}dialog label{display:block;
 <div class="acts"><button class="btn p" id="dio">Importer</button><button class="btn" id="dix">Annuler</button></div>
 </dialog>
 
+<script>
+var dp=null,ib=document.getElementById('inst');
+addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;ib.hidden=false});
+addEventListener('appinstalled',function(){ib.hidden=true});
+function installApp(){if(dp){dp.prompt();dp=null;ib.hidden=true}}
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!(navigator.standalone||matchMedia('(display-mode: standalone)').matches)){ib.hidden=false;ib.innerHTML='<div class="note">Pour installer : appuyez sur <b>Partager</b>, puis <b>Sur l’écran d’accueil</b>.</div>'}
+</script>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import{initializeFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,collection}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import{initializeFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,collection,addDoc,query,orderBy,limit,getDocs}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyDxVcn5qpc6LIOEXkb2rEaO21foxTuCdPE",authDomain:"cana-note-en-temps-reel.firebaseapp.com",projectId:"cana-note-en-temps-reel",storageBucket:"cana-note-en-temps-reel.firebasestorage.app",messagingSenderId:"866979178551",appId:"1:866979178551:web:dba822caaa420dec8237b2"});
 const auth=getAuth(app),db=initializeFirestore(app,{ignoreUndefinedProperties:true});
 const K='cana3e-notes-v1',$=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
@@ -94,7 +113,7 @@ function demo(){let seed=7;const r=()=>(seed=(seed*9301+49297)%233280)/233280;
 const D={teacher:'',demo:true,students:['Ouédraogo Aïcha','Sawadogo Ibrahim','Kaboré Fatoumata','Zongo Patrice','Traoré Mariam','Compaoré Serge','Sankara Estelle','Ilboudo Hamidou'].map(n=>({id:uid(),name:n,phone:''})),
 subjects:[['Mathématiques',4,'M. Ouattara'],['Physique-Chimie',2,'M. Toni'],['SVT',2,'Mme Zida'],['Français',4,'M. Nikièma'],['Anglais',2,'Mme Bambara'],['Histoire-Géo',2,'M. Sow']].map(([name,coef,teacher])=>({id:uid(),name,coef,teacher})),grades:{}};
 D.subjects.forEach((s,i)=>{D.grades[s.id]={};D.students.forEach(x=>{const b=6+r()*9-i*.3,q=()=>Math.round(Math.min(20,Math.max(2,b+r()*6-3))*2)/2;D.grades[s.id][x.id]={d:[q(),q(),q()],c:q()}})});return D}
-let S={teacher:'',students:[],subjects:[],grades:{},sent:{}},user,role=null,profile=null,USERS=[],unsubs=[],uunsub=null,ready=false,svTxt='',pendingName='',tm;
+let S={teacher:'',students:[],subjects:[],grades:{},sent:{},cid:'main',cname:'3ème',t:'t1'},user,role=null,profile=null,USERS=[],CLS=[],CD={},RAW={},JR=[],unsubs=[],uunsub=null,ready=false,svTxt='',pendingName='',tm;
 const last={c:'',s:'',g:{}};
 const canEdit=sid=>role=='director'||(profile&&profile.subjects||[]).includes(sid);
 const mySubs=()=>role=='director'?S.subjects:S.subjects.filter(x=>canEdit(x.id));
@@ -102,16 +121,25 @@ const typing=()=>{const a=document.activeElement;return a&&/INPUT|TEXTAREA|SELEC
 const setStat=t=>{svTxt=t;const e=$('#sv');if(e)e.textContent=t};
 const save=()=>{clearTimeout(tm);setStat('Enregistrement…');tm=setTimeout(flush,600)};
 async function flush(){if(!user||!ready)return;try{
- if(role=='director'){const cj=JSON.stringify({students:S.students,subjects:S.subjects});if(cj!==last.c){last.c=cj;await setDoc(doc(db,'class','main'),{students:S.students,subjects:S.subjects})}
-  const sj=JSON.stringify(S.sent||{});if(sj!==last.s){last.s=sj;await setDoc(doc(db,'meta','sent'),{keys:S.sent||{}})}}
- for(const sb of S.subjects){const gj=JSON.stringify(S.grades[sb.id]||{});if(gj!==last.g[sb.id]&&canEdit(sb.id)){last.g[sb.id]=gj;await setDoc(doc(db,'grades',sb.id),{data:S.grades[sb.id]||{}})}}
+ if(role=='director'){const cj=JSON.stringify({name:S.cname,students:S.students,subjects:S.subjects});if(cj!==last.c){last.c=cj;await setDoc(doc(db,'class',S.cid),{name:S.cname,students:S.students,subjects:S.subjects});CD[S.cid]={name:S.cname,students:S.students,subjects:S.subjects};if(!CLS.some(c=>c.id==S.cid))CLS.push({id:S.cid,name:S.cname})}
+  const sj=JSON.stringify(S.sent||{});if(sj!==last.s){last.s=sj;await setDoc(doc(db,'meta','sent_'+S.cid+'_'+S.t),{keys:S.sent||{}})}}
+ for(const sb of S.subjects){const k=S.t+'_'+sb.id,gj=JSON.stringify(S.grades[sb.id]||{});if(gj!==last.g[k]&&canEdit(sb.id)){const o=JSON.parse(last.g[k]||'{}'),n=S.grades[sb.id]||{};last.g[k]=gj;await setDoc(doc(db,'grades',k),{data:n});RAW[k]=JSON.parse(gj);await logG(sb,o,n)}}
  setStat('Enregistré ✓')}catch(e){setStat('Erreur d’enregistrement')}}
+async function logG(sb,o,n){try{const F=['Devoir 1','Devoir 2','Devoir 3','Composition'],gv=(g,i)=>g?(i<3?(g.d||[])[i]:g.c):null;let c=0;
+ for(const id in n){const x=S.students.find(a=>a.id==id);for(let i=0;i<4;i++){const a=gv(o[id],i),b=gv(n[id],i);if((a??null)!==(b??null)&&c++<60)await addDoc(collection(db,'journal'),{ts:Date.now(),by:S.teacher||user.email,cls:S.cname,tri:S.t,subj:sb.name,stu:x?x.name:id,fld:F[i],old:a??null,new:b??null})}}}catch(e){}}
+function applyG(){S.grades={};S.subjects.forEach(x=>{const k=S.t+'_'+x.id,r=RAW[k]||(S.t=='t1'?RAW[x.id]:null);S.grades[x.id]=r?JSON.parse(JSON.stringify(r)):{};last.g[k]=JSON.stringify(S.grades[x.id])})}
+async function switchTo(cid,t){await flush();if(cid){S.cid=cid;const v=CD[cid]||{};S.cname=v.name||'Classe';S.students=v.students||[];S.subjects=v.subjects||[];last.c=JSON.stringify({name:S.cname,students:S.students,subjects:S.subjects})}if(t)S.t=t;S.sent={};last.s='{}';sel=null;esel=null;applyG();listen();render()}
 function listen(){unsubs.forEach(f=>f());unsubs=[];if(role!='director'&&role!='teacher')return;
- unsubs.push(onSnapshot(doc(db,'class','main'),sn=>{ready=true;if(sn.metadata.hasPendingWrites)return;const d=sn.data()||{};S.students=d.students||[];S.subjects=d.subjects||[];last.c=JSON.stringify({students:S.students,subjects:S.subjects});if(!typing())render()}));
- unsubs.push(onSnapshot(collection(db,'grades'),sn=>{sn.docChanges().forEach(c=>{if(c.type=='removed')delete S.grades[c.doc.id];else if(!c.doc.metadata.hasPendingWrites){S.grades[c.doc.id]=c.doc.data().data||{};last.g[c.doc.id]=JSON.stringify(S.grades[c.doc.id])}});if(!typing())render()}));
+ unsubs.push(onSnapshot(collection(db,'class'),sn=>{ready=true;if(sn.metadata.hasPendingWrites)return;sn.docs.forEach(d=>CD[d.id]=d.data());CLS=sn.docs.map(d=>({id:d.id,name:d.data().name||'Classe'})).sort((a,b)=>a.name.localeCompare(b.name));
+  if(sn.docs.length&&!CD[S.cid])S.cid=sn.docs[0].id;const v=CD[S.cid]||{};S.cname=v.name||S.cname;S.students=v.students||[];S.subjects=v.subjects||[];last.c=JSON.stringify({name:S.cname,students:S.students,subjects:S.subjects});if(!typing()){applyG();render()}}));
+ unsubs.push(onSnapshot(collection(db,'grades'),sn=>{sn.docChanges().forEach(c=>{const id=c.doc.id;if(c.type=='removed'){delete RAW[id];return}if(c.doc.metadata.hasPendingWrites)return;RAW[id]=c.doc.data().data||{};const [t,sid]=id.includes('_')?id.split('_'):['t1',id];if(t==S.t&&S.subjects.some(x=>x.id==sid)){S.grades[sid]=JSON.parse(JSON.stringify(RAW[id]));last.g[id]=JSON.stringify(RAW[id])}});if(!typing())render()}));
  if(role=='director'){
-  unsubs.push(onSnapshot(doc(db,'meta','sent'),sn=>{if(sn.metadata.hasPendingWrites)return;S.sent=(sn.data()||{}).keys||{};last.s=JSON.stringify(S.sent)}));
+  unsubs.push(onSnapshot(doc(db,'meta','sent_'+S.cid+'_'+S.t),sn=>{if(sn.metadata.hasPendingWrites)return;S.sent=(sn.data()||{}).keys||{};last.s=JSON.stringify(S.sent);if(tab=='envoi'&&!typing())render()}));
   unsubs.push(onSnapshot(collection(db,'users'),sn=>{USERS=sn.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.role=='pending'?0:1)-(b.role=='pending'?0:1));if(!(tab=='comptes'&&typing()))render()}))}}
+const TL={t1:'1er trimestre',t2:'2ème trimestre',t3:'3ème trimestre'};
+const barHtml=()=>user&&(role=='director'||role=='teacher')&&['dash','saisie','envoi','classe'].includes(tab)?`<div class="bar2"><label>Classe <select id="csel">${(CLS.length?CLS:[{id:S.cid,name:S.cname}]).map(c=>`<option value="${c.id}" ${c.id==S.cid?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label><label>Trimestre <select id="tsel">${Object.entries(TL).map(([k,l])=>`<option value="${k}" ${k==S.t?'selected':''}>${l}</option>`).join('')}</select></label></div>`:'';
+function loadJr(){getDocs(query(collection(db,'journal'),orderBy('ts','desc'),limit(150))).then(sn=>{JR=sn.docs.map(d=>d.data());render()}).catch(()=>{JR=null;render()})}
+const journalV=()=>`<h2>Journal des modifications</h2><div class="bar2"><button class="btn" data-a="jr">Actualiser</button><span class="empty">Les 150 dernières modifications de notes : qui, quand, ancienne et nouvelle valeur.</span></div>`+(JR===null?'<p class="empty">Lecture impossible : publiez les nouvelles règles Firestore.</p>':JR.length?`<div class="wrap"><table><tr><th>#</th><th>Date et auteur</th><th>Classe · matière</th><th>Élève</th><th>Champ</th><th>Avant → après</th></tr>`+JR.map((j,i)=>`<tr><td>${i+1}</td><td style="text-align:left">${new Date(j.ts).toLocaleString('fr-FR')}<br><small>${esc(j.by||'')}</small></td><td style="text-align:left">${esc(j.cls||'')} · ${TL[j.tri]||''}<br><small>${esc(j.subj||'')}</small></td><td style="text-align:left">${esc(j.stu||'')}</td><td>${esc(j.fld||'')}</td><td>${j.old==null?'–':f(j.old)} → ${j.new==null?'–':f(j.new)}</td></tr>`).join('')+'</table></div>':'<p class="empty">Aucune modification enregistrée.</p>');
 const authErr=e=>({'auth/invalid-credential':'E-mail ou mot de passe incorrect.','auth/email-already-in-use':'Cet e-mail a déjà un compte : utilisez « Se connecter ».','auth/weak-password':'Mot de passe trop court (6 caractères minimum).','auth/invalid-email':'Adresse e-mail invalide.','auth/missing-password':'Saisissez le mot de passe.'}[e.code]||'Erreur : '+(e.code||e.message));
 const login=()=>`<div class="col" style="max-width:380px;margin:20px auto"><h2 style="margin-top:0">Connexion</h2>
 <label style="display:block;margin-top:8px">Nom complet (pour créer un compte)<input id="lnm" style="width:100%" autocomplete="name"></label>
@@ -129,7 +157,7 @@ const cl=m=>m==null?'':m>=10?'ok':'ko';
 let tab='dash',sel=null,esel=null,dEv=null;user=undefined;
 const bestEv=()=>{if(S.subjects.some(s=>S.students.some(x=>moy(s.id,x.id)!=null)))return'm';for(const k of['c','d2','d1','d0'])if(S.subjects.some(s=>S.students.some(x=>val(s.id,x.id,k)!=null)))return k;return'd0'};
 const evL=()=>dEv=='m'?'Moyenne du trimestre':EV.find(e=>e[0]==dEv)[1];
-const tabs=[['dash','Tableau de bord'],['saisie','Saisie des notes'],['envoi','Envoi aux parents'],['classe','Classe et matières'],['comptes','Comptes']];
+const tabs=[['dash','Tableau de bord'],['saisie','Saisie des notes'],['envoi','Envoi aux parents'],['classe','Classe et matières'],['comptes','Comptes'],['journal','Journal']];
 function nav(){const ok=user&&(role=='director'||role=='teacher');$('#nav').innerHTML=(ok?tabs.filter(([k])=>role=='director'||k=='dash'||k=='saisie').map(([k,l])=>`<button class="${k==tab?'on':''}" data-a="tab" data-v="${k}">${l}${k=='comptes'&&USERS.some(u=>u.role=='pending')?' •':''}</button>`).join(''):'')+(user?`<span id="sv" class="empty" style="margin-left:auto;align-self:center;white-space:nowrap">${svTxt}</span><button data-a="logout" style="border:0;background:none;color:var(--mut);font:600 14px Figtree,sans-serif;cursor:pointer;padding:10px">Déconnexion</button>`:'')}
 function msgBtn(id,sid){if(role!='director')return'';return`<button class="btn s" data-a="msg" data-id="${id}" data-s="${sid||'all'}">Message parent</button>`}
 function dash(){
@@ -138,10 +166,14 @@ function dash(){
  if(!S.subjects.find(s=>s.id==sel))sel=S.subjects[0].id;
  const gs=S.students.map(x=>gen(x.id,dEv)).filter(v=>v!=null),gok=gs.filter(v=>v>=10).length;
  const all=S.subjects.map(s=>({s,t:st(s.id)})),ps=all.filter(o=>o.t.p!=null).map(o=>o.t.p),low=ps.length>1?Math.min(...ps):null;
+ const al=S.students.map(x=>({x,l:S.subjects.filter(s=>{const v=val(s.id,x.id,dEv);return v!=null&&v<10})})).filter(o=>o.l.length>=3).sort((a,b)=>b.l.length-a.l.length);
+ const AL=al.length?`<h2>Élèves à suivre · ${evL()}</h2><div class="col r">${al.map(o=>`<div class="row"><span>${esc(o.x.name)}<br><small>${o.l.map(s=>esc(s.name)).join(', ')}</small></span><b>${o.l.length} matières &lt; 10</b></div>`).join('')}</div>`:'';
+ const dn=[];S.students.forEach(x=>S.subjects.forEach(s=>{const d=G(s.id,x.id).d.filter(v=>v!=null);if(d.length>1&&d[0]-d[d.length-1]>=3)dn.push({x,s,a:d[0],b:d[d.length-1]})}));
+ const BA=dn.length?`<h2>Élèves en baisse</h2><div class="col r">${dn.sort((p,q)=>(q.a-q.b)-(p.a-p.b)).slice(0,15).map(o=>`<div class="row"><span>${esc(o.x.name)}<br><small>${esc(o.s.name)}</small></span><b>${f(o.a)} → ${f(o.b)}</b></div>`).join('')}</div><p class="empty">Baisse d’au moins 3 points entre le premier et le dernier devoir.</p>`:'';
  let h=(S.demo?'<div class="note">Données d’exemple affichées. Allez dans « Classe et matières » pour les effacer et saisir votre classe.</div>':'')+
- `<div class="bar2"><label>Évaluation <select id="dev">${EV.map(([k,l])=>`<option value="${k}" ${k==dEv?'selected':''}>${k=='m'?'Moyenne du trimestre':l}</option>`).join('')}</select></label><span class="empty">Les statistiques se calculent dès qu’une évaluation est saisie, sans attendre la fin du trimestre.</span></div>
+ `<div class="bar2"><label>Évaluation <select id="dev">${EV.map(([k,l])=>`<option value="${k}" ${k==dEv?'selected':''}>${k=='m'?'Moyenne du trimestre':l}</option>`).join('')}</select></label><button class="btn" data-a="csv">Exporter (Excel)</button><span class="empty">Les statistiques se calculent dès qu’une évaluation est saisie, sans attendre la fin du trimestre.</span></div>
  <div class="kpis"><div class="kpi"><b>${S.students.length}</b><span>élèves</span></div><div class="kpi"><b>${f(gs.length?gs.reduce((a,b)=>a+b,0)/gs.length:null)}</b><span>moyenne de la classe /20</span></div><div class="kpi"><b>${gs.length?Math.round(gok/gs.length*100)+' %':'–'}</b><span>moyenne ≥ 10 (ensemble des matières)</span></div></div>
- <h2>Réussite par matière · ${evL()}</h2>`;
+ ${AL}${BA}<h2>Réussite par matière · ${evL()}</h2>`;
  all.forEach(({s,t})=>{h+=`<button class="subj ${s.id==sel?'on':''}" data-a="sel" data-v="${s.id}"><div class="t"><span>${esc(s.name)} <small>coef. ${s.coef}</small></span><span>${t.p==null?'Pas de notes':t.p+' % ≥ 10'} ${t.p!=null&&t.p===low?'<span class="flag">Taux le plus bas</span>':''}</span></div>
  <div class="bar" role="img" aria-label="${t.ok.length} élèves à 10 ou plus, ${t.ko.length} sous 10">${t.n?`<i class="a" style="width:${t.ok.length/t.n*100}%"></i><i class="b" style="width:${t.ko.length/t.n*100}%"></i>`:''}</div>
  <div class="sub"><span>${t.ok.length} ≥ 10 · ${t.ko.length} &lt; 10</span><span>moyenne de classe : ${f(t.avg)}</span></div></button>`});
@@ -150,9 +182,10 @@ function dash(){
  const s=S.subjects.find(a=>a.id==sel),t=st(sel);
  const list=a=>a.length?a.map(r=>`<div class="row"><span>${esc(r.x.name)}</span><span><span class="sc">${f(r.m)}</span> ${msgBtn(r.x.id,sel)}</span></div>`).join(''):'<div class="empty">Personne</div>';
  h+=`<h2>${esc(s.name)} : qui est à l’aise, qui a besoin d’aide</h2><div class="two"><div class="col g"><h3>Note ≥ 10 (${t.ok.length})</h3>${list(t.ok)}</div><div class="col r"><h3>Note &lt; 10 (${t.ko.length})</h3>${list(t.ko)}</div></div>`;
+ h+=`<h2>Évolution de la classe</h2><div class="wrap"><table><tr><th>#</th><th>Matière</th><th>D1</th><th>D2</th><th>D3</th><th>Compo.</th></tr>`+S.subjects.map((s,i)=>`<tr><td>${i+1}</td><td>${esc(s.name)}</td>${['d0','d1','d2','c'].map(k=>{const a=avgK(s.id,k);return`<td class="${cl(a)}">${f(a)}</td>`}).join('')}</tr>`).join('')+'</table></div><p class="empty">Moyenne de la classe à chaque évaluation.</p>';
  const rk=S.students.map(x=>({x,g:gen(x.id,dEv)})).sort((a,b)=>(b.g??-1)-(a.g??-1));
  h+=`<h2>Classement général · ${evL()}</h2><div class="wrap"><table><tr><th>Rang</th><th>Élève</th>${S.subjects.map(s=>`<th title="${esc(s.name)}">${esc(s.name.slice(0,5))}.</th>`).join('')}<th>Moy. gén.</th><th></th></tr>`+
- rk.map((r,i)=>`<tr><td>${r.g==null?'–':i+1}</td><td>${esc(r.x.name)}</td>${S.subjects.map(s=>{const m=val(s.id,r.x.id,dEv);return`<td class="${cl(m)}">${f(m)}</td>`}).join('')}<td class="${cl(r.g)}">${f(r.g)}</td><td>${msgBtn(r.x.id,'all')}</td></tr>`).join('')+'</table></div>';
+ rk.map((r,i)=>`<tr><td>${r.g==null?'–':i+1}</td><td>${esc(r.x.name)}</td>${S.subjects.map(s=>{const m=val(s.id,r.x.id,dEv);return`<td class="${cl(m)}">${f(m)}</td>`}).join('')}<td class="${cl(r.g)}">${f(r.g)}</td><td>${msgBtn(r.x.id,'all')} <button class="btn s" data-a="bul" data-id="${r.x.id}">Bulletin</button> <button class="btn s" data-a="evo" data-id="${r.x.id}">Évolution</button></td></tr>`).join('')+'</table></div>';
  return h}
 function saisie(){
  const MS=mySubs();if(!MS.length)return'<p class="empty">Aucune matière ne vous est attribuée. Demandez à la direction.</p>';
@@ -166,24 +199,64 @@ function saisie(){
  `<td><input class="n" inputmode="decimal" data-i="c" data-st="${x.id}" value="${g.c==null?'':f(g.c)}" aria-label="Composition ${esc(x.name)}"></td><td id="m-${x.id}" class="${cl(m)}">${f(m)}</td><td>${msgBtn(x.id,esel)}</td></tr>`});
  return h+'</table></div>'}
 function classe(){
- return`<h2>Élèves</h2><div class="bar2"><button class="btn" data-a="wipe">Effacer et repartir à zéro</button></div>
- <textarea id="ns" rows="4" style="width:100%" placeholder="Un élève par ligne : Nom Prénom ; téléphone du parent&#10;Kaboré Fatoumata ; 70123456"></textarea>
+ return`<h2>Sauvegarde</h2><div class="bar2"><button class="btn p" data-a="bk">Sauvegarder toutes les données (fichier)</button><label class="btn">Restaurer une sauvegarde<input type="file" id="rf" accept=".json,application/json" hidden></label></div><p class="empty" style="margin-top:0">La sauvegarde contient toutes les classes, matières, élèves et notes de tous les trimestres.</p>
+ <h2>Élèves · ${esc(S.cname)}</h2><div class="bar2"><button class="btn p" data-a="addcl">Nouvelle classe</button><button class="btn" data-a="rncl">Renommer la classe</button><button class="btn" data-a="wipe">Effacer et repartir à zéro</button></div>
+ <input type="file" id="sf" accept=".csv,.txt" style="margin-bottom:6px"><p class="empty" style="margin:2px 0 6px">Fichier CSV (Excel : Enregistrer sous, puis CSV) ou collage depuis Excel : <b>Nom ; Prénoms ; Téléphone</b> (nom et prénoms dans une ou plusieurs colonnes), un élève par ligne. Les doublons sont ignorés.</p><textarea id="ns" rows="4" style="width:100%" placeholder="Un élève par ligne : Nom Prénom ; téléphone du parent&#10;Kaboré Fatoumata ; 70123456"></textarea>
  <div class="acts" style="margin:8px 0 14px"><button class="btn p" data-a="addst">Ajouter ces élèves</button></div>
  <div class="wrap"><table><tr><th>#</th><th>Élève</th><th>Téléphone du parent</th><th></th></tr>${S.students.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.name)}</td><td><input data-ph="${x.id}" inputmode="tel" value="${esc(x.phone||'')}" aria-label="Téléphone ${esc(x.name)}"></td><td><button class="btn s" data-a="delst" data-id="${x.id}">Retirer</button></td></tr>`).join('')}</table></div>
  <h2>Matières</h2><div class="bar2"><input id="sn" placeholder="Nom de la matière"><input id="stn" placeholder="Professeur"><input id="sc" type="number" min="1" value="2" style="width:70px" aria-label="Coefficient"><button class="btn p" data-a="addsj">Ajouter la matière</button></div>
  <div class="wrap"><table><tr><th>#</th><th>Matière</th><th>Professeur</th><th>Coef.</th><th></th></tr>${S.subjects.map((s,i)=>`<tr><td>${i+1}</td><td>${esc(s.name)}</td><td><input data-tp="${s.id}" value="${esc(s.teacher||'')}" placeholder="Nom du professeur" aria-label="Professeur ${esc(s.name)}"></td><td>${s.coef}</td><td><button class="btn s" data-a="delsj" data-id="${s.id}">Retirer</button></td></tr>`).join('')}</table></div>`}
+const readTxt=(file,cb)=>file.arrayBuffer().then(b=>{let t;try{t=new TextDecoder('utf-8',{fatal:true}).decode(b)}catch(e){t=new TextDecoder('windows-1252').decode(b)}cb(t)});
+const ap=m=>m==null?'':m>=16?'Très bien':m>=14?'Bien':m>=12?'Assez bien':m>=10?'Passable':m>=8?'Insuffisant':'Faible';
+const rkOf=(arr,v)=>1+arr.filter(a=>a>v).length;
+const avgK=(sid,k)=>{const v=S.students.map(x=>val(sid,x.id,k)).filter(n=>n!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null};
+function exportCsv(){const q=v=>'"'+String(v).replace(/"/g,'""')+'"',n=v=>v==null?'':f(v);
+ const head=['Élève',...S.subjects.flatMap(s=>['D1','D2','D3','Compo','Moy'].map(c=>s.name+' '+c)),'Moyenne générale','Rang'];
+ const ge=S.students.map(x=>gen(x.id)),all=ge.filter(v=>v!=null);
+ const rows=S.students.map((x,i)=>[x.name,...S.subjects.flatMap(s=>{const g=G(s.id,x.id);return[...[0,1,2].map(k=>n(g.d[k])),n(g.c),n(moy(s.id,x.id))]}),n(ge[i]),ge[i]==null?'':rkOf(all,ge[i])]);
+ const csv='\ufeff'+[head,...rows].map(r=>r.map(q).join(';')).join('\r\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='notes-3eme-CANA.csv';document.body.appendChild(a);a.click();a.remove()}
+function openBul(id){const x=S.students.find(a=>a.id==id);
+ const rows=S.subjects.map(s=>{const g=G(s.id,id),m=moy(s.id,id),all=S.students.map(y=>moy(s.id,y.id)).filter(v=>v!=null),d=g.d.filter(v=>v!=null),tr=d.length>1?(d[d.length-1]>d[0]?'▲':d[d.length-1]<d[0]?'▼':'='):'';
+  return`<tr><td style="text-align:left">${esc(s.name)}</td><td>${s.coef}</td>${[0,1,2].map(k=>`<td>${f(g.d[k])}</td>`).join('')}<td>${f(g.c)}</td><td><b>${f(m)}</b></td><td>${tr}</td><td>${m==null?'–':rkOf(all,m)+'/'+all.length}</td><td style="text-align:left">${ap(m)}</td></tr>`}).join('');
+ const ge=gen(id),gall=S.students.map(y=>gen(y.id)).filter(v=>v!=null);
+ $('#bul').innerHTML=`<div class="noprint acts" style="margin-bottom:12px"><button class="btn p" data-a="bulp">Imprimer / Enregistrer en PDF</button><button class="btn" data-a="bulx">Fermer</button></div><h2 style="text-align:center">Lycée Privé CANA — Bulletin de notes</h2><p style="text-align:center">${esc(S.cname)} · ${TL[S.t]} — Élève : <b>${esc(x.name)}</b></p><div class="wrap"><table><tr><th style="text-align:left">Matière</th><th>Coef.</th><th>D1</th><th>D2</th><th>D3</th><th>Compo.</th><th>Moy.</th><th>Évol.</th><th>Rang</th><th style="text-align:left">Appréciation</th></tr>${rows}</table></div><p>${TRIM(id)}</p><p><b>Moyenne générale : ${f(ge)}/20</b> — Rang : ${ge==null?'–':rkOf(gall,ge)+'/'+gall.length} — ${ap(ge)}</p><p style="margin-top:40px">Le Directeur : ______________________</p>`;
+ $('#bul').hidden=false}
+const dl=(txt,name,type)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove()};
+function backup(){dl(JSON.stringify({app:'notes-cana',v:1,date:new Date().toISOString(),class:CD,grades:RAW}),'sauvegarde-notes-CANA-'+new Date().toISOString().slice(0,10)+'.json','application/json')}
+async function restore(file){let o;try{o=JSON.parse(await file.text())}catch(e){return alert('Fichier illisible.')}if(o.app!=='notes-cana')return alert('Ce fichier n’est pas une sauvegarde du logiciel.');
+ const cs=Object.keys(o.class||{}),gs=Object.keys(o.grades||{});if(!confirm(`Restaurer ${cs.length} classe(s) et ${gs.length} fiche(s) de notes ? Elles remplaceront les données actuelles correspondantes.`))return;
+ try{for(const id of cs)await setDoc(doc(db,'class',id),o.class[id]);for(const id of gs)await setDoc(doc(db,'grades',id),{data:o.grades[id]});alert('Restauration terminée.')}catch(e){alert('Erreur : '+(e.code||e.message))}}
+const rawT=(t,sid)=>(t==S.t?S.grades[sid]:(RAW[t+'_'+sid]||(t=='t1'?RAW[sid]:null)))||{};
+const moyT=(t,sid,id)=>moyG(rawT(t,sid)[id]);
+const genT=(t,id)=>{let a=0,w=0;S.subjects.forEach(s=>{const m=moyT(t,s.id,id);if(m!=null){a+=m*s.coef;w+=s.coef}});return w?a/w:null};
+const genA=id=>{const v=['t1','t2','t3'].map(t=>genT(t,id)).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null};
+const arrow=(a,b)=>a==null||b==null?'':b>a?'▲':b<a?'▼':'=';
+const TRIM=id=>`Moyennes générales — 1er trimestre : <b>${f(genT('t1',id))}</b> · 2ème : <b>${f(genT('t2',id))}</b> · 3ème : <b>${f(genT('t3',id))}</b> · Annuelle : <b>${f(genA(id))}</b>`;
+function openEvo(id){const x=S.students.find(a=>a.id==id),T=['t1','t2','t3'],ag=a=>a.length?a.reduce((p,q)=>p+q,0)/a.length:null;
+ const r1=S.subjects.map(s=>{const g=G(s.id,id),d=g.d.filter(v=>v!=null),m=moy(s.id,id);return`<tr><td style="text-align:left">${esc(s.name)}</td>${[0,1,2].map(k=>`<td class="${cl(g.d[k])}">${f(g.d[k])}</td>`).join('')}<td class="${cl(g.c)}">${f(g.c)}</td><td class="${cl(m)}">${f(m)}</td><td>${d.length>1?arrow(d[0],d[d.length-1]):''}</td></tr>`}).join('');
+ const r2=S.subjects.map(s=>{const m=T.map(t=>moyT(t,s.id,id)),v=m.filter(z=>z!=null),a=ag(v);return`<tr><td style="text-align:left">${esc(s.name)}</td>${m.map(z=>`<td class="${cl(z)}">${f(z)}</td>`).join('')}<td class="${cl(a)}">${f(a)}</td><td>${v.length>1?arrow(v[0],v[v.length-1]):''}</td></tr>`}).join('');
+ const bars=T.map((t,i)=>{const v=genT(t,id),h=v==null?0:v*10,c=v==null?'var(--line)':v>=10?'var(--ok)':'var(--ko)';return`<rect x="${30+i*90}" y="${210-h}" width="60" height="${h}" rx="6" fill="${c}"/><text x="${60+i*90}" y="${202-h}" text-anchor="middle" font-size="14" fill="currentColor">${f(v)}</text><text x="${60+i*90}" y="232" text-anchor="middle" font-size="13" fill="currentColor">T${i+1}</text>`}).join('');
+ $('#bul').innerHTML=`<div class="noprint acts" style="margin-bottom:12px"><button class="btn p" data-a="bulp">Imprimer / Enregistrer en PDF</button><button class="btn" data-a="bulx">Fermer</button></div><h2>Évolution de ${esc(x.name)}</h2><p class="empty">${esc(S.cname)}</p>
+ <h3 style="margin:12px 0 6px">Devoir par devoir · ${TL[S.t]}</h3><div class="wrap"><table><tr><th style="text-align:left">Matière</th><th>D1</th><th>D2</th><th>D3</th><th>Compo.</th><th>Moy.</th><th>Évol.</th></tr>${r1}</table></div>
+ <h3 style="margin:16px 0 6px">Trimestre par trimestre</h3><div class="wrap"><table><tr><th style="text-align:left">Matière</th><th>T1</th><th>T2</th><th>T3</th><th>Annuelle</th><th>Évol.</th></tr>${r2}</table></div>
+ <h3 style="margin:16px 0 6px">Moyenne générale par trimestre</h3><svg viewBox="0 0 300 240" style="max-width:360px;width:100%"><line x1="10" y1="110" x2="290" y2="110" stroke="currentColor" stroke-dasharray="4 4" opacity=".4"/><text x="292" y="106" text-anchor="end" font-size="11" fill="currentColor" opacity=".6">10</text>${bars}</svg><p>${TRIM(id)}</p>`;
+ $('#bul').hidden=false}
 const FILEMSG='<div class="note"><b>Ce fichier est ouvert depuis le téléphone (Téléchargements).</b><br>La connexion ne fonctionne qu’à partir d’une adresse https : hébergez le fichier (Netlify, Vercel…) sous le nom <b>index.html</b>, puis ouvrez le lien.</div>';
-function render(){if(role!='director'&&!['dash','saisie'].includes(tab))tab='dash';nav();$('#app').innerHTML=user===undefined?(/^https?:$/.test(location.protocol)?'<p id="boot" class="empty">Chargement…</p>':FILEMSG):!user?login():role=='pending'||!role?pendingV():tab=='dash'?dash():tab=='saisie'?saisie():tab=='envoi'?envoi():tab=='comptes'?comptes():classe()}
+function render(){if(role!='director'&&!['dash','saisie'].includes(tab))tab='dash';nav();$('#app').innerHTML=barHtml()+(user===undefined?(/^https?:$/.test(location.protocol)?'<p id="boot" class="empty">Chargement…</p>':FILEMSG):!user?login():role=='pending'||!role?pendingV():tab=='dash'?dash():tab=='saisie'?saisie():tab=='envoi'?envoi():tab=='comptes'?comptes():tab=='journal'?journalV():classe())}
 function setG(sid,id,k,v){const g=S.grades[sid]=S.grades[sid]||{};const e=g[id]=g[id]||{d:[null,null,null],c:null};if(k=='c')e.c=num(v);else e.d[+k[1]]=num(v)}
-const norm=s=>s.trim().toLowerCase().replace(/\s+/g,' ');
+const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase().replace(/\s+/g,' ');
+const isPh=v=>/^[\d\s+().-]+$/.test(v)&&v.replace(/\D/g,'').length>=8;
 function phone(p){let d=(p||'').replace(/\D/g,'');if(d.length==8)d='226'+d;return d}
 function msgText(id,sid){const x=S.students.find(a=>a.id==id),tn=(sid!='all'&&(S.subjects.find(a=>a.id==sid)||{}).teacher)||S.teacher,sig=tn?'\n'+tn:'';let b;
  if(sid=='all')b=S.subjects.map(s=>{const m=moy(s.id,id);return m==null?null:`• ${s.name} : ${f(m)}/20`}).filter(Boolean).join('\n')+`\nMoyenne générale : ${f(gen(id))}/20`;
  else{const s=S.subjects.find(a=>a.id==sid),g=G(sid,id),m=moy(sid,id);b=`${s.name} : devoirs ${g.d.filter(v=>v!=null).map(f).join(' ; ')||'–'}, composition ${f(g.c)}, moyenne ${f(m)}/20`+(m==null?'.':m>=10?' (résultat satisfaisant).':' (insuffisant : un suivi à la maison est souhaité).')}
  return`Bonjour, ici le Lycée Privé CANA (3ème). Résultats de ${x.name} :\n${b}\nCordialement.${sig}`}
-const EV=[['d0','Devoir 1'],['d1','Devoir 2'],['d2','Devoir 3'],['c','Composition'],['m','Moyenne']];
+const EV=[['d0','Devoir 1'],['d1','Devoir 2'],['d2','Devoir 3'],['c','Composition'],['m','Moyenne'],['a','Moyenne annuelle']];
 let ev='d0',esub='all';
-const val=(sid,id,k)=>{const g=G(sid,id);return k=='c'?g.c:k=='m'?moy(sid,id):g.d[+k[1]]};
+const moyG=g=>{if(!g)return null;const ds=(g.d||[]).filter(x=>x!=null);if(!ds.length||g.c==null)return null;return(ds.reduce((a,b)=>a+b,0)/ds.length+g.c)/2};
+const ann=(sid,id)=>{const v=['t1','t2','t3'].map(t=>t==S.t?moy(sid,id):moyG((RAW[t+'_'+sid]||(t=='t1'?RAW[sid]:null)||{})[id])).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null};
+const val=(sid,id,k)=>{if(k=='a')return ann(sid,id);const g=G(sid,id);return k=='c'?g.c:k=='m'?moy(sid,id):g.d[+k[1]]};
 const hasV=(id,k,sid)=>sid=='all'?S.subjects.some(s=>val(s.id,id,k)!=null):val(sid,id,k)!=null;
 function evMsg(id,k,sid){const x=S.students.find(a=>a.id==id),L=EV.find(e=>e[0]==k)[1];let b;
  if(sid=='all')b=S.subjects.map(s=>{const v=val(s.id,id,k);return v==null?null:`• ${s.name} : ${f(v)}/20`}).filter(Boolean).join('\n');
@@ -212,20 +285,21 @@ $('#dmt').oninput=links;
 $('#dmp').oninput=()=>{const x=S.students.find(a=>a.id==cur);x.phone=$('#dmp').value;save();links()};
 $('#dmc').onclick=async()=>{try{await navigator.clipboard.writeText($('#dmt').value);$('#dmc').textContent='Copié'}catch(e){$('#dmt').select()}setTimeout(()=>$('#dmc').textContent='Copier',1500)};
 $('#dmx').onclick=()=>$('#dm').close();
-$('#dif').onchange=e=>{const r=new FileReader();r.onload=()=>$('#dit').value=r.result;if(e.target.files[0])r.readAsText(e.target.files[0])};
+$('#dif').onchange=e=>{if(e.target.files[0])readTxt(e.target.files[0],t=>$('#dit').value=t)};
 $('#dix').onclick=()=>$('#di').close();
-$('#dio').onclick=()=>{let c=0;$('#dit').value.split(/\r?\n/).forEach((ln,i)=>{if(!ln.trim())return;const p=ln.split(/[;\t]/);if(i==0&&/nom/i.test(p[0]))return;
+$('#dio').onclick=()=>{let c=0;$('#dit').value.split(/\r?\n/).forEach((ln,i)=>{if(!ln.trim())return;let p=ln.split(/[;\t]/);if(p.length>5)p=[p.slice(0,p.length-4).join(' '),...p.slice(-4)];if(i==0&&/nom/i.test(p[0]))return;
  const nm=p[0].trim();if(!nm)return;let x=S.students.find(a=>norm(a.name)==norm(nm));if(!x){if(role!='director')return;x={id:uid(),name:nm,phone:''};S.students.push(x)}
  [1,2,3].forEach(k=>setG(esel,x.id,'d'+(k-1),p[k]));setG(esel,x.id,'c',p[4]);c++});
  S.demo=false;save();$('#di').close();$('#dit').value='';render()};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v,id=b.dataset.id;
- if(a=='tab'){tab=v;render()}else if(a=='sel'){sel=v;render()}else if(a=='msg')openMsg(id,b.dataset.s);else if(a=='imp')$('#di').showModal();
+ if(a=='tab'){tab=v;render();if(v=='journal')loadJr()}else if(a=='jr')loadJr();else if(a=='addcl'){const nm=(prompt('Nom de la nouvelle classe (ex. 3ème B)')||'').trim();if(nm)flush().then(()=>{const id=uid();CD[id]={name:nm,students:[],subjects:[]};CLS.push({id,name:nm});S.sent={};last.s='{}';S.cid=id;S.cname=nm;S.students=[];S.subjects=[];sel=null;esel=null;applyG();last.c='';save();listen();render()})}else if(a=='rncl'){const nm=(prompt('Nouveau nom de la classe',S.cname)||'').trim();if(nm){S.cname=nm;const c=CLS.find(x=>x.id==S.cid);if(c)c.name=nm;save();render()}}else if(a=='sel'){sel=v;render()}else if(a=='msg')openMsg(id,b.dataset.s);else if(a=='imp')$('#di').showModal();
  else if(a=='sent'){S.sent=S.sent||{};S.sent[b.dataset.k]=true;save();$('#sn-'+id).textContent='✓ Envoyé';const rows=S.students.filter(x=>hasV(x.id,ev,esub));$('#cnt').textContent=rows.filter(x=>S.sent[`${ev}|${esub}|${x.id}`]).length+' / '+rows.length}
  else if(a=='rstsent'){S.students.forEach(x=>{if(S.sent)delete S.sent[`${ev}|${esub}|${x.id}`]});save();render()}
  else if(a=='login'||a=='signup'){const em=$('#lem').value.trim(),pw=$('#lpw').value;pendingName=$('#lnm').value.trim();$('#lerr').textContent='Connexion…';(a=='login'?signInWithEmailAndPassword(auth,em,pw):createUserWithEmailAndPassword(auth,em,pw)).catch(e=>{$('#lerr').textContent=authErr(e)})}
  else if(a=='logout')signOut(auth);
  else if(a=='saveu'){const r=document.querySelector(`[data-ur="${id}"]`).value,sb=[...document.querySelectorAll(`[data-us="${id}"]:checked`)].map(c=>c.dataset.sid);updateDoc(doc(db,'users',id),{role:r,subjects:sb}).then(()=>b.textContent='Enregistré ✓').catch(()=>b.textContent='Erreur')}
- else if(a=='addst'){$('#ns').value.split(/\r?\n/).forEach(l=>{const p=l.split(/[;\t]/);if(p[0].trim())S.students.push({id:uid(),name:p[0].trim(),phone:(p[1]||'').trim()})});S.demo=false;save();render()}
+ else if(a=='bul')openBul(id);else if(a=='evo')openEvo(id);else if(a=='bk')backup();else if(a=='bulp')window.print();else if(a=='bulx')$('#bul').hidden=true;else if(a=='csv')exportCsv();
+ else if(a=='addst'){$('#ns').value.split(/\r?\n/).forEach(l=>{const p=l.split(/[;\t]/).map(v=>v.trim()),i=p.findIndex((v,k)=>k>0&&isPh(v)),nm=(i>0?p.slice(0,i):p.filter(Boolean)).join(' ').trim();if(nm&&!/^nom/i.test(nm)&&!S.students.some(x=>norm(x.name)==norm(nm)))S.students.push({id:uid(),name:nm,phone:i>0?p[i]:''})});S.demo=false;save();render()}
  else if(a=='delst'){if(confirm('Retirer cet élève et ses notes ?')){S.students=S.students.filter(x=>x.id!=id);save();render()}}
  else if(a=='addsj'){const n=$('#sn').value.trim();if(n){S.subjects.push({id:uid(),name:n,teacher:$('#stn').value.trim(),coef:Math.max(1,+$('#sc').value||1)});save();render()}}
  else if(a=='delsj'){if(confirm('Retirer cette matière et ses notes ?')){S.subjects=S.subjects.filter(x=>x.id!=id);delete S.grades[id];deleteDoc(doc(db,'grades',id)).catch(()=>{});save();render()}}
@@ -235,9 +309,9 @@ document.addEventListener('input',e=>{const t=e.target;
  else if(t.dataset.ph){S.students.find(x=>x.id==t.dataset.ph).phone=t.value;save()}
  else if(t.id=='tn'){S.teacher=t.value;S.subjects.find(s=>s.id==esel).teacher=t.value;save()}
  else if(t.dataset.tp){S.subjects.find(s=>s.id==t.dataset.tp).teacher=t.value;save()}});
-document.addEventListener('change',e=>{const t=e.target;if(t.id=='es'){esel=t.value;render()}else if(t.id=='dev'){dEv=t.value;render()}else if(t.id=='evs'){ev=t.value;render()}else if(t.id=='ess'){esub=t.value;render()}else if(t.dataset.ph&&tab=='envoi')render()});
+document.addEventListener('change',e=>{const t=e.target;if(t.id=='es'){esel=t.value;render()}else if(t.id=='dev'){dEv=t.value;render()}else if(t.id=='csel')switchTo(t.value);else if(t.id=='tsel')switchTo(null,t.value);else if(t.id=='evs'){ev=t.value;render()}else if(t.id=='ess'){esub=t.value;render()}else if(t.id=='rf'){if(t.files[0])restore(t.files[0]);t.value=''}else if(t.id=='sf'){if(t.files[0])readTxt(t.files[0],x=>$('#ns').value=x)}else if(t.dataset.ph&&tab=='envoi')render()});
 onAuthStateChanged(auth,async u=>{user=u;unsubs.forEach(f=>f());unsubs=[];if(uunsub){uunsub();uunsub=null}ready=false;
- if(!u){role=null;profile=null;S={teacher:'',students:[],subjects:[],grades:{},sent:{}};last.g={};render();return}
+ if(!u){role=null;profile=null;S=Object.assign(S,{teacher:'',students:[],subjects:[],grades:{},sent:{}});RAW={};CLS=[];CD={};last.g={};render();return}
  const ur=doc(db,'users',u.uid);
  try{let sn=await getDoc(ur);
   if(!sn.exists()){const nm=pendingName||u.email.split('@')[0];
